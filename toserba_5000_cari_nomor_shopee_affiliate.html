@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOSERBA 5000 - Cari Nomor Racun Shopee</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind Config Customizations (Sederhana, Bersih, Kontras Tinggi) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['Space Grotesk', 'monospace'],
+                    },
+                    colors: {
+                        brandYellow: '#FFD200',
+                        brandPink: '#FF4E88',
+                        brandDark: '#111111',
+                        brandBg: '#F3F4F6', // Light gray background for contrast
+                    },
+                    boxShadow: {
+                        flat: '4px 4px 0px 0px #111111',
+                        flatSm: '2px 2px 0px 0px #111111',
+                        flatMd: '3px 3px 0px 0px #111111',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .transition-flat {
+            transition: all 0.15s ease-in-out;
+        }
+        .transition-flat:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px 0px #111111;
+        }
+        .transition-flat:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px 0px #111111;
+        }
+    </style>
+</head>
+<body class="bg-brandBg text-brandDark font-sans min-h-screen flex flex-col selection:bg-brandYellow selection:text-brandDark">
+
+    <!-- HEADER -->
+    <header class="bg-white border-b-4 border-brandDark sticky top-0 z-40 px-4 py-3">
+        <div class="max-w-2xl mx-auto flex items-center justify-between">
+            <a href="#" class="flex items-center gap-2.5" onclick="resetSearch()">
+                <div class="bg-brandYellow text-brandDark font-mono font-bold text-sm px-2.5 py-1 border-2 border-brandDark rounded shadow-flatSm">
+                    T5
+                </div>
+                <div>
+                    <h1 class="font-mono font-bold text-base sm:text-lg leading-none tracking-tight">TOSERBA 5000</h1>
+                    <span class="text-[10px] text-brandDark/60 font-semibold tracking-wide block">Cari Link Shopee Melalui Nomor</span>
+                </div>
+            </a>
+            
+            <div class="text-[10px] sm:text-xs font-mono font-bold text-brandDark bg-brandYellow px-2 py-0.5 rounded border-2 border-brandDark shadow-flatSm">
+                VERSI NOMOR 🔢
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN AREA -->
+    <main class="flex-grow max-w-2xl w-full mx-auto px-4 py-6">
+        
+        <!-- Welcome / Instructions -->
+        <div class="bg-white border-2 border-brandDark p-4 rounded-xl shadow-flatSm mb-6">
+            <h2 class="font-mono font-bold text-sm sm:text-base tracking-tight text-brandDark flex items-center gap-2">
+                📢 <span class="bg-brandYellow px-1.5 py-0.5 rounded border border-brandDark">Cara Mencari Link Produk:</span>
+            </h2>
+            <p class="text-xs text-brandDark/80 mt-2 leading-relaxed">
+                Ketik <strong>nomor barang</strong> yang kamu lihat di video/iklan langsung pada kotak pencarian di bawah untuk memunculkan link belinya!
+            </p>
+        </div>
+
+        <!-- Sticky Search Box (Fokus Utama Angka/Nomor) -->
+        <div class="bg-white border-4 border-brandDark p-3 rounded-xl shadow-flat mb-6 sticky top-[68px] z-30">
+            <div class="flex items-center gap-3">
+                <span class="text-brandDark/50 pl-1 text-lg font-mono font-bold flex items-center gap-1.5">
+                    <span class="text-xs bg-brandDark text-white px-1.5 py-0.5 rounded font-mono">NO.</span>
+                </span>
+                <input 
+                    type="number" 
+                    pattern="[0-9]*" 
+                    inputmode="numeric"
+                    id="search-input" 
+                    oninput="handleSearch()" 
+                    placeholder="Masukkan nomor produk saja... (Contoh: 1, 5, 12)" 
+                    class="w-full focus:outline-none font-mono text-base sm:text-lg font-bold bg-transparent py-1 placeholder:font-sans placeholder:text-xs sm:placeholder:text-sm placeholder:font-normal placeholder:text-brandDark/40"
+                    autofocus
+                >
+                <button 
+                    onclick="clearSearch()" 
+                    id="clear-btn" 
+                    class="hidden bg-red-100 hover:bg-red-200 text-brandDark p-1 px-3 rounded-lg border-2 border-brandDark text-xs font-mono font-bold"
+                >
+                    BATAL
+                </button>
+            </div>
+        </div>
+
+        <!-- PRODUCT LIST -->
+        <div class="space-y-3" id="links-container">
+            <!-- Items loaded dynamically via JS -->
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div id="no-results" class="hidden text-center py-12 bg-white border-2 border-dashed border-brandDark/30 rounded-2xl">
+            <span class="text-4xl block mb-2">🔍</span>
+            <h4 class="font-mono font-bold text-sm text-brandDark">Nomor produk tidak ditemukan</h4>
+            <p class="text-xs text-brandDark/60 mt-1">Periksa kembali nomor produk dari postingan yang kamu lihat.</p>
+            <button onclick="resetSearch()" class="mt-4 bg-brandYellow font-mono font-bold text-xs py-1.5 px-4 border-2 border-brandDark rounded-md shadow-flatSm">
+                Tampilkan Semua Nomor
+            </button>
+        </div>
+
+    </main>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="copy-toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-brandDark text-white border-2 border-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-2.5">
+            <span class="text-brandYellow font-bold">✔</span>
+            <span class="font-mono text-xs font-bold">Link Shopee disalin!</span>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t-2 border-brandDark/20 py-6 px-4 mt-12">
+        <div class="max-w-2xl mx-auto text-center font-mono text-[10px] text-brandDark/50 space-y-2">
+            <p>&copy; 2026 TOSERBA 5000. Cari nomornya, klik linknya.</p>
+            <p class="text-[9px] text-brandDark/30">Halaman ini terafiliasi dengan program Shopee Affiliate resmi.</p>
+        </div>
+    </footer>
+
+    <!-- INTERACTIVE ENGINE -->
+    <script>
+        // Database link affiliate dengan urutan nomor yang konsisten
+        // Silakan sesuaikan link 'https://shope.ee/...' dengan link affiliate asli anda
+        const productsDatabase = [
+            {
+                id: 1,
+                title: "Kacamata Hitam Steampunk Retro",
+                desc: "Gaya vintage, anti silau matahari dan silau kenyataan hidup.",
+                emoji: "🕶️",
+                price: "Rp 14.500",
+                link: "https://shope.ee/your_affiliate_link_1"
+            },
+            {
+                id: 2,
+                title: "Mini Humidifier Portable Alpukat",
+                desc: "Cocok buat kamar kos estetik biar tetap segar seharian.",
+                emoji: "🥑",
+                price: "Rp 24.999",
+                link: "https://shope.ee/your_affiliate_link_2"
+            },
+            {
+                id: 3,
+                title: "Holder HP Gurita Tempel Dasbor",
+                desc: "Sangat kuat, cocok untuk motor dan mobil.",
+                emoji: "🐙",
+                price: "Rp 4.900",
+                link: "https://shope.ee/your_affiliate_link_3"
+            },
+            {
+                id: 4,
+                title: "Gantungan Kunci Lampu Senter LED USB",
+                desc: "Super terang, bisa dicas ulang tanpa perlu ganti baterai.",
+                emoji: "🔦",
+                price: "Rp 8.900",
+                link: "https://shope.ee/your_affiliate_link_4"
+            },
+            {
+                id: 5,
+                title: "Kaos Kaki Bermotif Retro Pop",
+                desc: "Bahan adem dan tebal untuk melengkapi sneakers kamu.",
+                emoji: "🧦",
+                price: "Rp 6.200",
+                link: "https://shope.ee/your_affiliate_link_5"
+            },
+            {
+                id: 6,
+                title: "Kipas Angin Leher Portable",
+                desc: "Bebas gerah di jalanan tanpa perlu megang kipas tangan.",
+                emoji: "🌬️",
+                price: "Rp 39.000",
+                link: "https://shope.ee/your_affiliate_link_6"
+            },
+            {
+                id: 7,
+                title: "Botol Minum Motivasi Gradasi 2 Liter",
+                desc: "Membantu melacak asupan air harianmu dengan menyenangkan.",
+                emoji: "🍼",
+                price: "Rp 19.500",
+                link: "https://shope.ee/your_affiliate_link_7"
+            },
+            {
+                id: 8,
+                title: "Tripod Ringlight Mini Selfie",
+                desc: "Fleksibel untuk pencahayaan video konten media sosial.",
+                emoji: "📸",
+                price: "Rp 32.500",
+                link: "https://shope.ee/your_affiliate_link_8"
+            },
+            {
+                id: 9,
+                title: "Korek Api Sensor Sentuh Listrik USB",
+                desc: "Tanpa gas, tanpa minyak. Desain futuristik tahan angin.",
+                emoji: "🔥",
+                price: "Rp 12.000",
+                link: "https://shope.ee/your_affiliate_link_9"
+            },
+            {
+                id: 10,
+                title: "Alat Pengupas Buah Praktis 3-in-1",
+                desc: "Mengupas buah dan sayur jadi sangat cepat dan aman.",
+                emoji: "🥔",
+                price: "Rp 9.900",
+                link: "https://shope.ee/your_affiliate_link_10"
+            },
+            {
+                id: 11,
+                title: "Tali Sepatu Elastis Tanpa Ikat",
+                desc: "Gak ribet ikat tali sepatu lagi, tinggal selip langsung jalan.",
+                emoji: "👟",
+                price: "Rp 5.500",
+                link: "https://shope.ee/your_affiliate_link_11"
+            },
+            {
+                id: 12,
+                title: "Gantungan Baju Lipat Travel Portable",
+                desc: "Mudah dibawa bepergian, hemat tempat di koper.",
+                emoji: "🧥",
+                price: "Rp 3.200",
+                link: "https://shope.ee/your_affiliate_link_12"
+            }
+        ];
+
+        // MENGGAMBAR LIST PRODUK
+        function renderList(filteredProducts) {
+            const container = document.getElementById('links-container');
+            const noResults = document.getElementById('no-results');
+            
+            container.innerHTML = '';
+
+            if (filteredProducts.length === 0) {
+                container.classList.add('hidden');
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            noResults.classList.add('hidden');
+
+            filteredProducts.forEach(product => {
+                // Formatting id menjadi dua digit (01, 02, dst)
+                const formattedId = String(product.id).padStart(2, '0');
+
+                const itemHTML = `
+                    <div class="bg-white border-2 border-brandDark rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-flatSm">
+                        
+                        <!-- Info Produk Kiri -->
+                        <div class="flex items-center gap-3">
+                            <!-- Nomor Urut Super Mencolok -->
+                            <div class="bg-brandDark text-brandYellow font-mono font-bold text-center px-2.5 py-1.5 rounded-lg border-2 border-brandDark flex-shrink-0 min-w-[50px]">
+                                <span class="text-[9px] block leading-none opacity-80 uppercase">No</span>
+                                <span class="text-lg leading-none">${formattedId}</span>
+                            </div>
+
+                            <div class="space-y-0.5">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-base select-none">${product.emoji}</span>
+                                    <h3 class="font-mono font-bold text-xs sm:text-sm text-brandDark tracking-tight leading-snug">
+                                        ${product.title}
+                                    </h3>
+                                </div>
+                                <p class="text-[10px] text-brandDark/70 line-clamp-1 leading-normal">
+                                    ${product.desc}
+                                </p>
+                                <div class="pt-0.5">
+                                    <span class="text-xs font-bold text-brandPink">${product.price}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Aksi Kanan -->
+                        <div class="flex items-center gap-2 sm:self-center w-full sm:w-auto mt-1 sm:mt-0">
+                            <!-- Tombol Salin Link -->
+                            <button 
+                                onclick="copyToClipboard('${product.link}')" 
+                                class="flex-1 sm:flex-none border-2 border-brandDark bg-white hover:bg-gray-100 text-brandDark font-mono font-bold text-[10px] py-2 px-2.5 rounded-lg flex items-center justify-center gap-1 active:translate-y-0.5 transition-flat"
+                                title="Salin Link Affiliate"
+                            >
+                                <i class="fa-solid fa-copy"></i> SALIN
+                            </button>
+                            
+                            <!-- Tombol Langsung Beli -->
+                            <a 
+                                href="${product.link}" 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                class="flex-[2] sm:flex-none bg-brandYellow hover:bg-yellow-400 border-2 border-brandDark text-brandDark font-mono font-bold text-[10px] py-2 px-4 rounded-lg flex items-center justify-center gap-1.5 shadow-flatSm hover:shadow-none transition-flat active:translate-y-0.5"
+                            >
+                                🛒 BELI SEKARANG <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+                            </a>
+                        </div>
+
+                    </div>
+                `;
+                container.innerHTML += itemHTML;
+            });
+        }
+
+        // FUNGSI PENCARIAN UTAMA (MENGIKUTI NOMOR URUT)
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.trim();
+            const clearBtn = document.getElementById('clear-btn');
+
+            if (query.length > 0) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+
+            filterAndRender();
+        }
+
+        // PENYARINGAN BERDASARKAN ANGKA
+        function filterAndRender() {
+            const query = document.getElementById('search-input').value.trim();
+            
+            if (query === "") {
+                renderList(productsDatabase);
+                return;
+            }
+
+            // Jika ada query, filter apakah id / nomornya sama dengan input user
+            const filtered = productsDatabase.filter(p => {
+                return p.id.toString() === query;
+            });
+
+            renderList(filtered);
+        }
+
+        // HAPUS PENCARIAN
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('clear-btn').classList.add('hidden');
+            filterAndRender();
+        }
+
+        function resetSearch() {
+            clearSearch();
+        }
+
+        // SALIN LINK KE KELIPBOARD (Kompatibel dengan iFrame Sandbox)
+        function copyToClipboard(text) {
+            const inputTemp = document.createElement('input');
+            document.body.appendChild(inputTemp);
+            inputTemp.value = text;
+            inputTemp.select();
+            document.execCommand('copy');
+            document.body.removeChild(inputTemp);
+
+            // Munculkan Toast
+            const toast = document.getElementById('copy-toast');
+            toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 2000);
+        }
+
+        // DETEKSI PARAMETER URL OTOMATIS (?no=5 atau #5)
+        function checkURLParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let noParam = urlParams.get('no') || urlParams.get('n');
+            
+            // Periksa juga jika user menggunakan hash (#10)
+            if (!noParam && window.location.hash) {
+                noParam = window.location.hash.replace('#', '');
+            }
+
+            if (noParam && !isNaN(noParam)) {
+                const searchInput = document.getElementById('search-input');
+                searchInput.value = parseInt(noParam);
+                handleSearch();
+            } else {
+                renderList(productsDatabase);
+            }
+        }
+
+        // INISIALISASI HALAMAN
+        window.onload = function() {
+            checkURLParams();
+        };
+    </script>
+</body>
+</html>
